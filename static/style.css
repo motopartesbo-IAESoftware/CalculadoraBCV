@@ -1,0 +1,283 @@
+/* ============================================================
+   Calculadora BCV · Material Design
+   ============================================================ */
+
+:root {
+  --primary: #1a237e;
+  --primary-dark: #11184f;
+  --primary-light: #e8eaf6;
+  --accent: #f9a825;
+  --surface: #ffffff;
+  --background: #f1f3f9;
+  --text: #1c1c28;
+  --text-secondary: #5f6368;
+  --error: #d32f2f;
+  --success: #2e7d32;
+  --radius: 16px;
+  --shadow-1: 0 2px 6px rgba(0, 0, 0, .10);
+  --shadow-2: 0 10px 28px rgba(26, 35, 126, .16);
+  --shadow-3: 0 14px 44px rgba(0, 0, 0, .22);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { font-size: 16px; }
+
+body {
+  font-family: "Roboto", system-ui, -apple-system, Segoe UI, sans-serif;
+  background:
+    radial-gradient(1100px 500px at 100% -10%, #e8eaf6 0%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(900px 480px at -10% 0%, #fff8e1 0%, rgba(255, 255, 255, 0) 55%),
+    var(--background);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- App bar ---------- */
+.app-bar {
+  background: linear-gradient(120deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #fff;
+  padding: 22px 24px;
+  box-shadow: var(--shadow-2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.app-bar__content {
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand { display: flex; align-items: center; gap: 14px; }
+
+.brand__icon {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: grid; place-items: center;
+  font-size: 26px;
+  font-weight: 700;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .18);
+}
+
+.brand__title { font-size: 1.15rem; font-weight: 500; letter-spacing: .2px; }
+
+.brand__subtitle { font-size: .8rem; opacity: .85; }
+
+.btn--icon {
+  border: none;
+  background: rgba(255, 255, 255, .14);
+  color: #fff;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid; place-items: center;
+  transition: background .2s, transform .3s;
+}
+.btn--icon:hover { background: rgba(255, 255, 255, .26); }
+.btn--icon:active { transform: scale(.92); }
+.btn--icon.spinning svg { animation: spin .7s linear infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Layout ---------- */
+.container {
+  max-width: 560px;
+  margin: 26px auto 40px;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ---------- Card (Material) ---------- */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  padding: 22px;
+  transition: box-shadow .25s;
+}
+.card:hover { box-shadow: var(--shadow-2); }
+
+/* ---------- Tasa card ---------- */
+.tasa-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tasa-card__label {
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+
+.chip--status {
+  font-size: .72rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--primary-light);
+  color: var(--primary);
+  white-space: nowrap;
+}
+.chip--status.ok { background: #e8f5e9; color: var(--success); }
+.chip--status.err { background: #ffebee; color: var(--error); }
+
+.tasa-card__value {
+  font-size: 2.6rem;
+  font-weight: 700;
+  letter-spacing: .5px;
+  color: var(--primary);
+  margin: 8px 0 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tasa-card__value small { font-size: 1.1rem; font-weight: 500; color: var(--text-secondary); }
+
+.tasa-card__meta { font-size: .82rem; color: var(--text-secondary); }
+
+/* ---------- Calc card ---------- */
+.calc-card__title {
+  font-size: 1.05rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+  color: var(--primary);
+}
+
+/* Conversor (dos cajas + botón de intercambio) */
+.conv {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.conv__box {
+  background: var(--background);
+  border: 2px solid transparent;
+  border-radius: 14px;
+  padding: 14px 16px;
+  transition: border-color .2s, background .2s, box-shadow .2s;
+}
+
+.conv__box--result {
+  background: linear-gradient(120deg, var(--primary-light), #f1f8ff);
+}
+
+.conv__box:focus-within {
+  border-color: var(--primary);
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+}
+
+.conv__bill {
+  display: block;
+  font-size: .8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.conv__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.conv__cur {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.conv__box--result .conv__cur { color: var(--success); }
+
+.conv__input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.conv__input--result { cursor: default; }
+
+.conv__input::-webkit-outer-spin-button,
+.conv__input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.conv__input[type="number"] { -moz-appearance: textfield; }
+
+.conv__swap {
+  align-self: center;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: var(--shadow-1);
+  cursor: pointer;
+  display: grid; place-items: center;
+  transition: background .2s, color .2s, transform .3s;
+}
+.conv__swap:hover { background: var(--primary); color: #fff; }
+.conv__swap:active { transform: rotate(180deg) scale(.92); }
+
+.result-hint {
+  margin-top: 14px;
+  font-size: .84rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  text-align: center;
+  font-size: .75rem;
+  color: var(--text-secondary);
+  padding: 8px 16px;
+}
+.footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
+.footer a:hover { text-decoration: underline; }
+
+/* ---------- Snackbar ---------- */
+.snackbar {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translate(-50%, 90px);
+  background: var(--primary-dark);
+  color: #fff;
+  font-size: .87rem;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-3);
+  opacity: 0;
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1), opacity .3s;
+  z-index: 100;
+  max-width: 92vw;
+}
+.snackbar.show { transform: translate(-50%, 0); opacity: 1; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 420px) {
+  .tasa-card__value { font-size: 2.1rem; }
+  .result__value { font-size: 1.6rem; }
+  .app-bar { padding: 16px; }
+}
