@@ -1,0 +1,22 @@
+{
+  "name": "Calculadora BCV",
+  "short_name": "BCV Calc",
+  "description": "Conversor de Dólares a Bolívares usando el tipo de cambio oficial del BCV",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f1f3f9",
+  "theme_color": "#1a237e",
+  "icons": [
+    {
+      "src": "static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

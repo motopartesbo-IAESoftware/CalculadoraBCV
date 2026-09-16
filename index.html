@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora BCV · Bs/USD</title>
+<link rel="stylesheet" href="static/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a237e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="static/icon-192.png">
+</head>
+<body>
+
+<!-- Barra superior -->
+<header class="app-bar">
+  <div class="app-bar__content">
+    <div class="brand">
+      <div class="brand__icon" aria-hidden="true">₿</div>
+      <div>
+        <h1 class="brand__title">Calculadora BCV</h1>
+        <span class="brand__subtitle">Tipo de cambio oficial · Bs / USD</span>
+      </div>
+    </div>
+    <button id="btn-refresh" class="btn btn--icon" title="Actualizar tasa" aria-label="Actualizar tasa">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="container">
+  <section class="card tasa-card">
+    <div class="tasa-card__row">
+      <span class="tasa-card__label">Tasa del día (BCV)</span>
+      <span class="chip chip--status" id="status-chip">Cargando…</span>
+    </div>
+    <div class="tasa-card__value" id="tasa-value">—</div>
+    <div class="tasa-card__meta" id="tasa-meta">Consultando la página del BCV…</div>
+  </section>
+
+  <section class="card calc-card">
+    <h2 class="calc-card__title">Conversor</h2>
+
+    <div class="conv">
+      <div class="conv__box">
+        <span class="conv__bill">Monto a convertir</span>
+        <div class="conv__row">
+          <span class="conv__cur" id="currency-from">USD</span>
+          <input class="conv__input" id="amount-from" type="number" inputmode="decimal"
+                 step="any" min="0" placeholder="0,00" autocomplete="off">
+        </div>
+      </div>
+
+      <button class="conv__swap" id="btn-swap" title="Invertir dirección" aria-label="Invertir dirección">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/>
+        </svg>
+      </button>
+
+      <div class="conv__box conv__box--result">
+        <span class="conv__bill">Equivalente en</span>
+        <div class="conv__row">
+          <span class="conv__cur" id="currency-to">Bs.</span>
+          <input class="conv__input conv__input--result" id="amount-to" type="text"
+                 readonly placeholder="0,00" tabindex="-1">
+        </div>
+      </div>
+    </div>
+
+    <div class="result-hint" id="result-hint">Ingresa un monto para convertir.</div>
+  </section>
+
+  <footer class="footer">
+    Fuente: <a href="https://www.bcv.org.ve/" target="_blank" rel="noopener">Banco Central de Venezuela</a> ·
+    Tasa del tipo de cambio de referencia del SMC
+  </footer>
+</main>
+
+<div id="snackbar" class="snackbar" role="status" aria-live="polite"></div>
+
+<script src="static/app.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+</script>
+</body>
+</html>

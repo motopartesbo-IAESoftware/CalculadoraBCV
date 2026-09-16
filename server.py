@@ -109,14 +109,25 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         path = self.path.split("?", 1)[0]
         if path in ("/", "/index.html"):
-            return self._serve_static("index.html")
+            return self._serve_root_index()
         if path == "/api/tasa":
             return self._api_tasa()
+        if path == "/data/tasa.json":
+            return self._serve_data_json()
         if path.startswith("/static/"):
             return self._serve_static(path[len("/static/"):])
         if path == "/favicon.ico":
             return self._serve_static("favicon.ico")
         return self._send(404, json.dumps({"error": "not found"}).encode("utf-8"))
+
+    def _serve_root_index(self):
+        full = join(STATIC_ROOT, "index.html")
+        try:
+            with open(full, "rb") as f:
+                body = f.read()
+        except OSError:
+            return self._send(404, json.dumps({"error": "not found"}).encode("utf-8"))
+        return self._send(200, body, "text/html; charset=utf-8")
 
     def _serve_static(self, name):
         safe = name.replace("\\", "/").replace("..", "").lstrip("/")
@@ -131,6 +142,15 @@ class Handler(BaseHTTPRequestHandler):
         if ctype.startswith("text/") or ctype in ("application/javascript",):
             ctype += "; charset=utf-8"
         return self._send(200, body, ctype)
+
+    def _serve_data_json(self):
+        full = join(STATIC_ROOT, "data", "tasa.json")
+        try:
+            with open(full, "rb") as f:
+                body = f.read()
+        except OSError:
+            return self._send(404, json.dumps({"error": "sin datos locales"}).encode("utf-8"))
+        return self._send(200, body, "application/json; charset=utf-8")
 
     def _api_tasa(self):
         try:

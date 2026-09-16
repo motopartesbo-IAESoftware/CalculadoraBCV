@@ -58,31 +58,54 @@
     showSnack._t = setTimeout(() => els.snackbar.classList.remove("show"), 3200);
   }
 
+  async function fetchTasa() {
+    // 1) Backend local (Python de D:\CalculadoraBCV)
+    // 2) Archivo data/tasa.json (GitHub Pages)
+    const base = document.baseURI;
+    const sources = [
+      new URL("api/tasa", base).href,
+      new URL("data/tasa.json", base).href,
+    ];
+    let lastError = null;
+    for (const url of sources) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        if (data && data.dolar !== undefined) return data;
+        throw new Error("JSON sin tasa");
+      } catch (e) {
+        lastError = e;
+      }
+    }
+    throw lastError || new Error("Sin fuentes de tasa");
+  }
+
   async function loadRate(manual) {
     els.refresh.classList.add("spinning");
-    setStatus("Consultando BCV…");
+    setStatus("Consultando…");
     try {
-      const res = await fetch("/api/tasa");
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "Error del servidor");
+      const data = await fetchTasa();
 
       const tasa = Number(data.dolar);
       if (!isFinite(tasa) || tasa <= 0) throw new Error("Tasa no válida recibida");
 
       state.rate = tasa;
       const fecha = data.fecha_valor || data.fecha_actualizacion || null;
+      const consulta = data.consulta || "";
 
       els.tasa.innerHTML = "Bs. " + fmtTasa(tasa) + " <small>por USD 1</small>";
       els.meta.textContent = fecha
         ? "Tipo de cambio de referencia · " + fecha
-        : "Tipo de cambio de referencia · consultado hoy";
-      setStatus("Actualizada", "ok");
+        : "Tipo de cambio · consultado " + (consulta || "hoy");
+      setStatus("OK", "ok");
       if (manual) showSnack("Tasa actualizada correctamente");
       update();
     } catch (e) {
       setStatus("Sin conexión", "err");
+      els.tasa.textContent = "—";
       els.meta.textContent = "No se pudo obtener la tasa del BCV.";
-      showSnack("No se pudo conectar con el BCV. Revisa tu conexión e inténtalo de nuevo.");
+      showSnack("Sin conexión. Revisa tu internet e intenta de nuevo.");
       console.error(e);
     } finally {
       els.refresh.classList.remove("spinning");
