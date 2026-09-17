@@ -59,20 +59,23 @@
   }
 
   async function fetchTasa() {
-    // 1) Backend local (Python de D:\CalculadoraBCV)
-    // 2) Archivo data/tasa.json (GitHub Pages)
+    // 1) Backend local (Python de D:\CalculadoraBCV)  -> en vivo
+    // 2) Archivo data/tasa.json (GitHub Pages)         -> dato guardado
     const base = document.baseURI;
     const sources = [
-      new URL("api/tasa", base).href,
-      new URL("data/tasa.json", base).href,
+      { url: new URL("api/tasa", base).href, source: "vivo" },
+      { url: new URL("data/tasa.json", base).href, source: "guardado" },
     ];
     let lastError = null;
-    for (const url of sources) {
+    for (const s of sources) {
       try {
-        const res = await fetch(url);
+        const res = await fetch(s.url);
         if (!res.ok) throw new Error("HTTP " + res.status);
         const data = await res.json();
-        if (data && data.dolar !== undefined) return data;
+        if (data && data.dolar !== undefined) {
+          data._source = s.source;
+          return data;
+        }
         throw new Error("JSON sin tasa");
       } catch (e) {
         lastError = e;
@@ -93,13 +96,26 @@
       state.rate = tasa;
       const fecha = data.fecha_valor || data.fecha_actualizacion || null;
       const consulta = data.consulta || "";
+      const enVivo = data._source === "vivo";
 
       els.tasa.innerHTML = "Bs. " + fmtTasa(tasa) + " <small>por USD 1</small>";
-      els.meta.textContent = fecha
-        ? "Tipo de cambio de referencia · " + fecha
-        : "Tipo de cambio · consultado " + (consulta || "hoy");
-      setStatus("OK", "ok");
-      if (manual) showSnack("Tasa actualizada correctamente");
+      if (enVivo) {
+        els.meta.textContent = fecha
+          ? "Tipo de cambio de referencia · " + fecha
+          : "Tipo de cambio · consultado " + (consulta || "hoy");
+      } else {
+        els.meta.textContent =
+          "Tasa del: " + (fecha || consulta || "dato guardado") +
+          " · actualízala con el botón 🔄 o abre el sitio del BCV";
+      }
+      setStatus(enVivo ? "En vivo" : "Guardada", "ok");
+      if (manual) {
+        if (enVivo) {
+          showSnack("Tasa actualizada en vivo desde el BCV");
+        } else {
+          showSnack("Mostrando la última tasa guardada. La versión web se actualiza varias veces al día.");
+        }
+      }
       update();
     } catch (e) {
       setStatus("Sin conexión", "err");
