@@ -51,6 +51,23 @@
     els.status.className = "chip chip--status" + (cls ? " " + cls : "");
   }
 
+  function formatDateTime(s) {
+    if (!s) return "";
+    const d = new Date(s.replace(" ", "T"));
+    if (isNaN(d.getTime())) return s;
+    try {
+      return d.toLocaleString("es-VE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (e) {
+      return s;
+    }
+  }
+
   function showSnack(msg) {
     els.snackbar.textContent = msg;
     els.snackbar.classList.add("show");
@@ -84,7 +101,7 @@
     throw lastError || new Error("Sin fuentes de tasa");
   }
 
-  async function loadRate(manual) {
+  async function loadRate(manual, auto) {
     els.refresh.classList.add("spinning");
     setStatus("Consultando…");
     try {
@@ -96,22 +113,31 @@
       state.rate = tasa;
       const fecha = data.fecha_valor || data.fecha_actualizacion || null;
       const consulta = data.consulta || "";
+      const horaVerificacion = formatDateTime(consulta);
       const enVivo = data._source === "vivo";
 
       els.tasa.innerHTML = "Bs. " + fmtTasa(tasa) + " <small>por USD 1</small>";
       if (enVivo) {
-        els.meta.textContent = fecha
+        const base = fecha
           ? "Tipo de cambio de referencia · " + fecha
-          : "Tipo de cambio · consultado " + (consulta || "hoy");
+          : "Tipo de cambio · consultado hoy";
+        els.meta.textContent = horaVerificacion
+          ? base + " · Última verificación: " + horaVerificacion
+          : base;
       } else {
         els.meta.textContent =
           "Tasa del: " + (fecha || consulta || "dato guardado") +
+          (horaVerificacion ? " · Última verificación: " + horaVerificacion : "") +
           " · actualízala con el botón 🔄 o abre el sitio del BCV";
       }
       setStatus(enVivo ? "En vivo" : "Guardada", "ok");
       if (manual) {
         if (enVivo) {
-          showSnack("Tasa actualizada en vivo desde el BCV");
+          if (auto) {
+            showSnack("Última verificación del BCV: " + (horaVerificacion || consulta || "hoy"));
+          } else {
+            showSnack("Tasa actualizada en vivo desde el BCV");
+          }
         } else {
           showSnack("Mostrando la última tasa guardada. La versión web se actualiza varias veces al día.");
         }
@@ -190,4 +216,7 @@
   // Inicio
   setDirection("usd-bs");
   loadRate(false);
+
+  // Verificar la tasa del BCV automáticamente cada 30 minutos
+  setInterval(() => loadRate(true, true), 30 * 60 * 1000);
 })();

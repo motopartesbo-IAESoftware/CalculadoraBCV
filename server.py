@@ -9,6 +9,7 @@ import json
 import re
 import ssl
 import threading
+import time
 import urllib.request
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from os.path import join, dirname, abspath
@@ -16,7 +17,7 @@ from os.path import join, dirname, abspath
 BASE_URL = "https://www.bcv.org.ve/"
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 PORT = 8000
-CACHE_SECONDS = 600  # 10 minutos; la tasa se actualiza una vez al día en el BCV
+CACHE_SECONDS = 30 * 60  # 30 minutos: la app verifica la página del BCV cada media hora
 
 ctx = ssl.create_default_context()
 ctx.check_hostname = False
@@ -69,8 +70,16 @@ def parse_rate(html):
     return resultado
 
 
+def _guardar_json_local(data):
+    # Mantiene sincronizado data/tasa.json (fallback para GitHub Pages / offline)
+    try:
+        with open(join(STATIC_ROOT, "data", "tasa.json"), "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except OSError:
+        pass
+
+
 def get_tasa(force=False):
-    import time
     now = time.time()
     if not force and _cache["data"] and (now - _cache["timestamp"]) < CACHE_SECONDS:
         return _cache["data"]
@@ -81,7 +90,18 @@ def get_tasa(force=False):
     data["consulta"] = time.strftime("%Y-%m-%d %H:%M:%S")
     _cache["data"] = data
     _cache["timestamp"] = now
+    _guardar_json_local(data)
     return data
+
+
+def _auto_refrescar(interval=CACHE_SECONDS):
+    # Verifica la página del BCV cada 30 minutos aunque nadie entre a la página
+    while True:
+        time.sleep(interval)
+        try:
+            get_tasa(force=True)
+        except Exception:
+            pass
 
 
 STATIC_ROOT = dirname(abspath(__file__))
@@ -184,4 +204,5 @@ def open_browser():
 if __name__ == "__main__":
     print("Servidor: http://localhost:%d/" % PORT)
     open_browser()
+    threading.Thread(target=_auto_refrescar, daemon=True).start()
     ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()

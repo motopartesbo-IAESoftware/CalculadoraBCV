@@ -6,7 +6,7 @@
  * - Offline: la app funciona con la última tasa conocida.
  */
 
-const CACHE = "bcv-v2";
+const CACHE = "bcv-v3";
 const ESTATICA = [
   ".",
   "index.html",
